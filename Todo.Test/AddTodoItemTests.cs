@@ -4,18 +4,21 @@ namespace Todo.Test
 {
     public class AddTodoItemTests
     {
-        ICommandDispatcher _dispatcher;
+        ICommandDispatcher _commandDispatcher;
+        IQueryDispatcher _queryDispatcher;
 
         public AddTodoItemTests()
         {
             var serviceCollection = new ServiceCollection();
             serviceCollection.AddSingleton<IStore, InMemoryStore>();
             serviceCollection.AddScoped<ICommandDispatcher, CommandDispatcher>();
+            serviceCollection.AddScoped<IQueryDispatcher, QueryDispatcher>();
 
             serviceCollection.AddTodoModule();
 
             var serviceProvider = serviceCollection.BuildServiceProvider();
-            _dispatcher = serviceProvider.GetRequiredService<ICommandDispatcher>();
+            _commandDispatcher = serviceProvider.GetRequiredService<ICommandDispatcher>();
+            _queryDispatcher = serviceProvider.GetRequiredService<IQueryDispatcher>();
         }
 
         [Fact]
@@ -23,7 +26,7 @@ namespace Todo.Test
         {
             var command = new AddTodoItemCommand("Pick up milk");
 
-            var result = await _dispatcher.Dispatch(command);
+            var result = await _commandDispatcher.Dispatch(command);
 
             Assert.NotEqual(Guid.Empty, result.Id);
         }
@@ -31,10 +34,10 @@ namespace Todo.Test
         [Fact]
         public async Task AddTodoItem_ShouldSucced_WhenExistingItems()
         {
-            await _dispatcher.Dispatch(new AddTodoItemCommand("Pick up milk"));
+            await _commandDispatcher.Dispatch(new AddTodoItemCommand("Pick up milk"));
             var command = new AddTodoItemCommand("Pick up sugar");
 
-            var result = await _dispatcher.Dispatch(command);
+            var result = await _commandDispatcher.Dispatch(command);
 
             Assert.NotEqual(Guid.Empty, result.Id);
         }
@@ -49,6 +52,17 @@ namespace Todo.Test
         public void AddTodoItem_ShouldFail_WhenGivenNullDescription()
         {
             Assert.Throws<ArgumentException>(() => new AddTodoItemCommand(null!));
+        }
+
+        [Fact]
+        public async Task AddTodoItem_ShouldAddIncompleteItem_WhenSucceded()
+        {
+            await _commandDispatcher.Dispatch(new AddTodoItemCommand("Pick up milk"));
+
+            var result = await _queryDispatcher.Dispatch(new GetTodoItemsQuery());
+            Assert.NotNull(result);
+            Assert.Single(result.TodoItems);
+            Assert.False(result.TodoItems.Single().IsComplete);
         }
     }
 }

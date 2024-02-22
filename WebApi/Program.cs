@@ -25,9 +25,9 @@ app.UseSwaggerUI(c =>
 // TODO API
 app.MapPost("/AddTodoItem", async (ICommandDispatcher dispatcher, NewTodoItemDto todoItem) => await dispatcher.Dispatch(new AddTodoItemCommand(todoItem.Description)));
 app.MapPost("/CompleteTodoItem/{id}", async (ICommandDispatcher dispatcher, Guid id) => await dispatcher.Dispatch(new CompleteTodoItemCommand(id)));
-//app.MapPost("/UndoTodoItemComplete/{id}", async (ICommandDispatcher dispatcher, Guid id) => await dispatcher.Dispatch(new UndoTodoItemComplete(id)));
-//app.MapPost("/RemoveTodoItem/{id}", async (ICommandDispatcher dispatcher, Guid id) => await dispatcher.Dispatch(new RemoveTodoItem(id)));
-app.MapGet("/GetTodoItems", async (IQueryDispatcher dispatcher) => await dispatcher.Dispatch(new GetTodoItemsQuery(), new CancellationToken()));
+app.MapPost("/UndoCompleteTodoItem/{id}", async (ICommandDispatcher dispatcher, Guid id) => await dispatcher.Dispatch(new UndoCompleteTodoItemCommand(id)));
+app.MapPost("/RemoveCompleteTodoItem/{id}", async (ICommandDispatcher dispatcher, Guid id) => await dispatcher.Dispatch(new RemoveCompleteTodoItemCommand(id)));
+app.MapGet("/GetTodoItems", async (IQueryDispatcher dispatcher) => await dispatcher.Dispatch(new GetTodoItemsQuery()));
 
 app.Run();
 

@@ -1,16 +1,9 @@
 public interface IStore
 {
-    Task StoreItem<T, TId>(TId id, T item)
-        where T : class
-        where TId : notnull;
-
-
-    Task<T?> GetItem<T, TId>(TId id)
-        where T : class
-        where TId : notnull;
-
-    Task<IList<T>> GetItems<T>()
-        where T : class;
+    Task StoreItem<T, TId>(TId id, T item) where T : class where TId : notnull;
+    Task<T?> GetItem<T, TId>(TId id) where T : class where TId : notnull;
+    Task<IList<T>> GetItems<T>() where T : class;
+    Task RemoveItem<TId>(TId id) where TId : notnull;
 }
 
 public class InMemoryStore : IStore
@@ -47,5 +40,12 @@ public class InMemoryStore : IStore
             .ToList();
 
         return await Task.FromResult(items);
+    }
+
+    public Task RemoveItem<TId>(TId id)
+        where TId : notnull
+    {
+        _items.Remove(id);
+        return Task.CompletedTask;
     }
 }

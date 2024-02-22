@@ -18,6 +18,11 @@ internal class TodoItem
     {
         IsComplete = true;
     }
+
+    public void MarkAsIncomplete()
+    {
+        IsComplete = false;
+    }
 }
 
 internal class TodoItemId : ValueObject
