@@ -5,13 +5,12 @@ using System.Text.Json;
 
 namespace WebApi.Test
 {
-    public class GetTodoItemsTests
+    public class GetTodoItemsTests : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly HttpClient _httpClient;
 
-        public GetTodoItemsTests() 
+        public GetTodoItemsTests(WebApplicationFactory<Program> application) 
         {
-            var application = new WebApplicationFactory<Program>();
             _httpClient = application.CreateClient();
         }
 
