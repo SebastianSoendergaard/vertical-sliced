@@ -1,4 +1,5 @@
 using Framework;
+using Todo;
 
 internal class TodoItem
 {
@@ -53,14 +54,23 @@ internal class TodoItemDescription : ValueObject
 {
     public string Value { get; private set;}
 
-    public TodoItemDescription(string description)
+    private TodoItemDescription(string description)
     {
-        if(string.IsNullOrEmpty(description)) throw new ArgumentException("Descripton for a new todo item can not be empty");
         Value = description;
     }
 
     protected override IEnumerable<object> GetEqualityComponents()
     {
         yield return Value;
+    }
+
+    public static Result<TodoItemDescription> Create(string description)
+    {
+        if (string.IsNullOrWhiteSpace(description))
+        {
+            return Result<TodoItemDescription>.Failure(TodoErrors.InvalidDescription);
+        }
+
+        return Result<TodoItemDescription>.Success(new TodoItemDescription(description));
     }
 }

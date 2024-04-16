@@ -2,12 +2,21 @@ using Framework;
 
 public class AddTodoItemCommand : ICommand<AddTodoItemResult>
 {
-    public AddTodoItemCommand(string description)
+    private AddTodoItemCommand(TodoItemDescription description)
     {
-        Description = new TodoItemDescription(description);
+        Description = description;
     }
 
     internal TodoItemDescription Description { get; private set; }
+
+    public static Result<AddTodoItemCommand> Create(string description)
+    { 
+        var d = TodoItemDescription.Create(description);
+        
+        return d.IsFailure
+            ? Result<AddTodoItemCommand>.Failure(new Error("", "")) // This should be combined error from all value objects
+            : Result<AddTodoItemCommand>.Success(new AddTodoItemCommand(d.SuccessOrDefault()));
+    }
 }
 
 public class AddTodoItemResult
