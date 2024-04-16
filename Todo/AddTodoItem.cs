@@ -12,10 +12,10 @@ public class AddTodoItemCommand : ICommand<AddTodoItemResult>
     public static Result<AddTodoItemCommand> Create(string description)
     { 
         var d = TodoItemDescription.Create(description);
-        
-        return d.IsFailure
-            ? Result<AddTodoItemCommand>.Failure(new Error("", "")) // This should be combined error from all value objects
-            : Result<AddTodoItemCommand>.Success(new AddTodoItemCommand(d.SuccessOrDefault()));
+
+        return Result<AddTodoItemCommand>.Combined(
+            () => new AddTodoItemCommand(d.SuccessResult),
+            d);
     }
 }
 
