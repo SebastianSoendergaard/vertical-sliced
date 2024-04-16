@@ -1,56 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Framework;
 
-namespace Framework
+public abstract class ValueObject
 {
-    public abstract class ValueObject
+    protected static bool EqualOperator(ValueObject left, ValueObject right)
     {
-        protected static bool EqualOperator(ValueObject left, ValueObject right)
+        if (ReferenceEquals(left, null) ^ ReferenceEquals(right, null))
         {
-            if (ReferenceEquals(left, null) ^ ReferenceEquals(right, null))
-            {
-                return false;
-            }
-            return ReferenceEquals(left, right) || left.Equals(right);
+            return false;
+        }
+        return ReferenceEquals(left, right) || left.Equals(right);
+    }
+
+    protected static bool NotEqualOperator(ValueObject left, ValueObject right)
+    {
+        return !(EqualOperator(left, right));
+    }
+
+    protected abstract IEnumerable<object> GetEqualityComponents();
+
+    public override bool Equals(object? obj)
+    {
+        if (obj == null || obj.GetType() != GetType())
+        {
+            return false;
         }
 
-        protected static bool NotEqualOperator(ValueObject left, ValueObject right)
-        {
-            return !(EqualOperator(left, right));
-        }
+        var other = (ValueObject)obj;
 
-        protected abstract IEnumerable<object> GetEqualityComponents();
+        return this.GetEqualityComponents().SequenceEqual(other.GetEqualityComponents());
+    }
 
-        public override bool Equals(object? obj)
-        {
-            if (obj == null || obj.GetType() != GetType())
-            {
-                return false;
-            }
+    public override int GetHashCode()
+    {
+        return GetEqualityComponents()
+            .Select(x => x != null ? x.GetHashCode() : 0)
+            .Aggregate((x, y) => x ^ y);
+    }
 
-            var other = (ValueObject)obj;
+    public static bool operator ==(ValueObject one, ValueObject two)
+    {
+        return EqualOperator(one, two);
+    }
 
-            return this.GetEqualityComponents().SequenceEqual(other.GetEqualityComponents());
-        }
-
-        public override int GetHashCode()
-        {
-            return GetEqualityComponents()
-                .Select(x => x != null ? x.GetHashCode() : 0)
-                .Aggregate((x, y) => x ^ y);
-        }
-
-        public static bool operator ==(ValueObject one, ValueObject two)
-        {
-            return EqualOperator(one, two);
-        }
-
-        public static bool operator !=(ValueObject one, ValueObject two)
-        {
-            return NotEqualOperator(one, two);
-        }
+    public static bool operator !=(ValueObject one, ValueObject two)
+    {
+        return NotEqualOperator(one, two);
     }
 }
+

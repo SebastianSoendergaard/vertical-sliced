@@ -1,3 +1,5 @@
+namespace Framework;
+
 public interface IStore
 {
     Task StoreItem<T, TId>(TId id, T item) where T : class where TId : notnull;

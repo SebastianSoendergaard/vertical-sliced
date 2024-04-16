@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Framework;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
