@@ -68,9 +68,9 @@ internal class TodoItemDescription : ValueObject
     {
         if (string.IsNullOrWhiteSpace(description))
         {
-            return Result<TodoItemDescription>.Failure(TodoErrors.InvalidDescription);
+            return TodoErrors.InvalidDescription;
         }
 
-        return Result<TodoItemDescription>.Success(new TodoItemDescription(description));
+        return new TodoItemDescription(description);
     }
 }

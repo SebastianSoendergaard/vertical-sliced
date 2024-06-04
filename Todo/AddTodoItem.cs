@@ -1,6 +1,6 @@
 using Framework;
 
-public class AddTodoItemCommand : ICommand<AddTodoItemResult>
+public class AddTodoItemCommand : ICommand<Result<AddTodoItemResult>>
 {
     private AddTodoItemCommand(TodoItemDescription description)
     {
@@ -11,11 +11,8 @@ public class AddTodoItemCommand : ICommand<AddTodoItemResult>
 
     public static Result<AddTodoItemCommand> Create(string description)
     { 
-        var d = TodoItemDescription.Create(description);
-
-        return Result<AddTodoItemCommand>.Combined(
-            () => new AddTodoItemCommand(d.SuccessResult),
-            d);
+        return TodoItemDescription.Create(description)
+            .Bind(d => new AddTodoItemCommand(d));
     }
 }
 
@@ -29,9 +26,9 @@ public class AddTodoItemResult
     public Guid Id { get; private set; }
 }
 
-internal class AddTodoItemHandler(IStore store) : ICommandHandler<AddTodoItemCommand, AddTodoItemResult>
+internal class AddTodoItemHandler(IStore store) : ICommandHandler<AddTodoItemCommand, Result<AddTodoItemResult>>
 {
-    public async Task<AddTodoItemResult> Handle(AddTodoItemCommand command, CancellationToken ct)
+    public async Task<Result<AddTodoItemResult>> Handle(AddTodoItemCommand command, CancellationToken ct)
     {
         var todoItem = new TodoItem(TodoItemId.NewId(), command.Description);
         await store.StoreItem(todoItem.Id, todoItem);

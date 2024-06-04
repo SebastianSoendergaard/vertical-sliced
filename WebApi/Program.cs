@@ -1,5 +1,7 @@
 using System.Net;
 using Framework;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using Todo;
 using WebApi;
@@ -50,7 +52,17 @@ app.UseSwaggerUI(c =>
 });
 
 // TODO API
-app.MapPost("/api/AddTodoItem", async (ICommandDispatcher dispatcher, NewTodoItemDto todoItem) => await dispatcher.Dispatch(new AddTodoItemCommand(todoItem.Description)));
+app.MapPost("/api/AddTodoItem", 
+    async (ICommandDispatcher dispatcher, NewTodoItemDto todoItem) =>
+    {
+        return await AddTodoItemCommand
+            .Create(todoItem.Description)
+            .BindAsync(async cmd => await dispatcher.Dispatch(cmd))
+            .MatchAsync(
+                success => Results.Ok(success),
+                errors => Results.BadRequest(errors));
+    });
+
 app.MapPost("/api/CompleteTodoItem/{id}", async (ICommandDispatcher dispatcher, Guid id) => await dispatcher.Dispatch(new CompleteTodoItemCommand(id)));
 app.MapPost("/api/UndoCompleteTodoItem/{id}", async (ICommandDispatcher dispatcher, Guid id) => await dispatcher.Dispatch(new UndoCompleteTodoItemCommand(id)));
 app.MapPost("/api/RemoveCompleteTodoItem/{id}", async (ICommandDispatcher dispatcher, Guid id) => await dispatcher.Dispatch(new RemoveCompleteTodoItemCommand(id)));

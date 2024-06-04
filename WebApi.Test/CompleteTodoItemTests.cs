@@ -47,7 +47,7 @@ namespace WebApi.Test
         [Fact]
         public async Task CompleteTodoItem_ShouldReturnInternalServerError_OnUnexpectedError()
         {
-            _commandDispatcher.SetException(new ArgumentException());
+            _commandDispatcher.SetException(new Exception());
 
             var response = await _httpClient.PostAsync($"api/CompleteTodoItem/{Guid.NewGuid()}");
 
