@@ -25,10 +25,10 @@ namespace Todo.Test
         [Fact]
         public async Task UndoCompleteTodoItem_ShouldMarkItemAsIncompleted_WhenSucceded()
         {
-            var addResult = await _commandDispatcher.Dispatch(new AddTodoItemCommand("Pick up milk"));
-            await _commandDispatcher.Dispatch(new CompleteTodoItemCommand(addResult.Id));
+            var addResult = await _commandDispatcher.Dispatch(AddTodoItemCommand.Create("Pick up milk").Value);
+            await _commandDispatcher.Dispatch(new CompleteTodoItemCommand(addResult.Value.Id));
 
-            await _commandDispatcher.Dispatch(new UndoCompleteTodoItemCommand(addResult.Id));
+            await _commandDispatcher.Dispatch(new UndoCompleteTodoItemCommand(addResult.Value.Id));
 
             var result = await _queryDispatcher.Dispatch(new GetTodoItemsQuery());
             Assert.False(result.TodoItems.Single().IsComplete);
@@ -37,8 +37,8 @@ namespace Todo.Test
         [Fact]
         public async Task UndoCompleteTodoItem_ShouldNotMarkItemAsIncompleted_WhenFailed()
         {
-            var addResult = await _commandDispatcher.Dispatch(new AddTodoItemCommand("Pick up milk"));
-            await _commandDispatcher.Dispatch(new CompleteTodoItemCommand(addResult.Id));
+            var addResult = await _commandDispatcher.Dispatch(AddTodoItemCommand.Create("Pick up milk").Value);
+            await _commandDispatcher.Dispatch(new CompleteTodoItemCommand(addResult.Value.Id));
 
             var undoCommand = new UndoCompleteTodoItemCommand(Guid.NewGuid());
             await Assert.ThrowsAsync<ArgumentException>(async () => await _commandDispatcher.Dispatch(undoCommand));

@@ -25,9 +25,9 @@ namespace Todo.Test
         [Fact]
         public async Task CompleteTodoItem_ShouldMarkItemAsCompleted_WhenSucceded()
         {
-            var addResult = await _commandDispatcher.Dispatch(new AddTodoItemCommand("Pick up milk"));
+            var addResult = await _commandDispatcher.Dispatch(AddTodoItemCommand.Create("Pick up milk").Value);
 
-            await _commandDispatcher.Dispatch(new CompleteTodoItemCommand(addResult.Id));
+            await _commandDispatcher.Dispatch(new CompleteTodoItemCommand(addResult.Value.Id));
 
             var result = await _queryDispatcher.Dispatch(new GetTodoItemsQuery());
             Assert.True(result.TodoItems.Single().IsComplete);
@@ -36,7 +36,7 @@ namespace Todo.Test
         [Fact]
         public async Task CompleteTodoItem_ShouldNotMarkItemAsCompleted_WhenFailed()
         {
-            await _commandDispatcher.Dispatch(new AddTodoItemCommand("Pick up milk"));
+            await _commandDispatcher.Dispatch(AddTodoItemCommand.Create("Pick up milk").Value);
 
             var completeCommand = new CompleteTodoItemCommand(Guid.NewGuid());
             await Assert.ThrowsAsync<ArgumentException>(async () => await _commandDispatcher.Dispatch(completeCommand));
