@@ -15,12 +15,12 @@ public class AddTodoItemV2
         internal TodoItemDescription Description { get; private set; }
         internal TodoItemExpiryDate ExpiryDate { get; private set; }
 
-        public static Result<Command> Create(string title, string description, DateOnly? expiryDate)
+        public static Result<Command> Create(string title, string description, DateOnly? expiryDate, ITimeProvider timeProvider)
         {
             return TodoItemTitle.Create(title)
                 .Join(TodoItemDescription.Create(description))
-                .Join(TodoItemExpiryDate.Create(expiryDate))
-                .Bind(t, d, e => new Command(t, d, e));
+                .Join(TodoItemExpiryDate.Create(expiryDate, timeProvider))
+                .Bind(x => new Command(x.Item1, x.Item2, x.Item3));
         }
     }
 
@@ -38,7 +38,7 @@ public class AddTodoItemV2
     {
         public async Task<Result<Result>> Handle(Command command, CancellationToken ct)
         {
-            var todoItem = new TodoItem(TodoItemId.NewId(), command.Description);
+            var todoItem = new TodoItem(TodoItemId.NewId(), command.Title, command.Description, command.ExpiryDate);
             await store.StoreItem(todoItem.Id, todoItem);
             return new Result(todoItem.Id);
         }

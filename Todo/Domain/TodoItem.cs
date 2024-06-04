@@ -4,7 +4,7 @@ internal class TodoItem
     public TodoItemDescription Description { get; private set; }
     public bool IsComplete { get; private set; }
 
-    public TodoItem(TodoItemId id, TodoItemDescription description)
+    public TodoItem(TodoItemId id, TodoItemTitle title, TodoItemDescription description, TodoItemExpiryDate expiryDate)
     {
         Id = id;
         Description = description;

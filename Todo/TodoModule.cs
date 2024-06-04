@@ -14,6 +14,8 @@ namespace Todo
             services.AddScoped<ICommandHandler<UndoCompleteTodoItem.Command>, UndoCompleteTodoItem.Handler>();
             services.AddScoped<ICommandHandler<RemoveCompleteTodoItem.Command>, RemoveCompleteTodoItem.Handler>();
 
+            services.AddScoped<ITimeProvider, Infrastructure.TimeProvider>();
+
             return services;
         }
     }

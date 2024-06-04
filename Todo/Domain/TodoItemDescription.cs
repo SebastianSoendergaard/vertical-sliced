@@ -24,4 +24,14 @@ internal class TodoItemDescription : ValueObject
 
         return new TodoItemDescription(description);
     }
+
+    public TodoItemTitle AsTitle()
+    {
+        var title = Value;
+        if (title.Length > 100)
+        { 
+            title = $"{title.Substring(0, 97)}...";
+        }
+        return TodoItemTitle.Create(title).Value;
+    }
 }

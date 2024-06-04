@@ -81,21 +81,83 @@ public class Result : Result<bool>
 
 public static class ResultExtension
 {
-    public static Result<TResult> Join<TSource, TResult>(this Result<TSource> source, Result<TResult> next)
+    public static Result<(TSource, TResult)> Join<TSource, TResult>(this Result<TSource> source, Result<TResult> next)
     {
-        return source.Match(
-            success => next,
-            errors => Result<TResult>.Failure(errors, next.Errors));
+        if (next.IsSuccess)
+        {
+            return source.Match(
+                success => (success, next.Value),
+                errors => Result<(TSource, TResult)>.Failure(errors, next.Errors));
+        }
+
+        return Result<(TSource, TResult)>.Failure(source.Errors, next.Errors);
     }
 
-    public static Result<TResult> Join<TSource, TResult>(this Result<TSource> source, Result<TResult> next)
+    public static Result<(TSource1, TSource2, TResult)> Join<TSource1, TSource2, TResult>(this Result<(TSource1, TSource2)> source, Result<TResult> next)
     {
-        return source.Match(
-            success => next,
-            errors => Result<TResult>.Failure(errors, next.Errors));
+        if (next.IsSuccess)
+        {
+            return source.Match(
+                success => (success.Item1, success.Item2, next.Value),
+                errors => Result<(TSource1, TSource2, TResult)>.Failure(errors, next.Errors));
+        }
+
+        return Result<(TSource1, TSource2, TResult)>.Failure(source.Errors, next.Errors);
+    }
+
+    public static Result<(TSource1, TSource2, TSource3, TResult)> Join<TSource1, TSource2, TSource3, TResult>(this Result<(TSource1, TSource2, TSource3)> source, Result<TResult> next)
+    {
+        if (next.IsSuccess)
+        {
+            return source.Match(
+                success => (success.Item1, success.Item2, success.Item3, next.Value),
+                errors => Result<(TSource1, TSource2, TSource3, TResult)>.Failure(errors, next.Errors));
+        }
+
+        return Result<(TSource1, TSource2, TSource3, TResult)>.Failure(source.Errors, next.Errors);
+    }
+
+    public static Result<(TSource1, TSource2, TSource3, TSource4, TResult)> Join<TSource1, TSource2, TSource3, TSource4, TResult>(this Result<(TSource1, TSource2, TSource3, TSource4)> source, Result<TResult> next)
+    {
+        if (next.IsSuccess)
+        {
+            return source.Match(
+                success => (success.Item1, success.Item2, success.Item3, success.Item4, next.Value),
+                errors => Result<(TSource1, TSource2, TSource3, TSource4, TResult)>.Failure(errors, next.Errors));
+        }
+
+        return Result<(TSource1, TSource2, TSource3, TSource4, TResult)>.Failure(source.Errors, next.Errors);
     }
 
     public static Result<TResult> Bind<TSuccess, TResult>(this Result<TSuccess> source, Func<TSuccess, TResult> next)
+    {
+        return source.Match(
+            success => next(success),
+            errors => Result<TResult>.Failure(errors));
+    }
+
+    public static Result<TResult> Bind<TSuccess1, TSuccess2, TResult>(this Result<(TSuccess1, TSuccess2)> source, Func<(TSuccess1, TSuccess2), TResult> next)
+    {
+        return source.Match(
+            success => next(success),
+            errors => Result<TResult>.Failure(errors));
+    }
+
+    public static Result<TResult> Bind<TSuccess1, TSuccess2, TSuccess3, TResult>(this Result<(TSuccess1, TSuccess2, TSuccess3)> source, Func<(TSuccess1, TSuccess2, TSuccess3), TResult> next)
+    {
+        return source.Match(
+            success => next(success),
+            errors => Result<TResult>.Failure(errors));
+    }
+
+    public static Result<TResult> Bind<TSuccess1, TSuccess2, TSuccess3, TSuccess4, TResult>(this Result<(TSuccess1, TSuccess2, TSuccess3, TSuccess3)> source, Func<(TSuccess1, TSuccess2, TSuccess3, TSuccess3), TResult> next)
+    {
+        return source.Match(
+            success => next(success),
+            errors => Result<TResult>.Failure(errors));
+    }
+
+    public static Result<TResult> Bind<TSuccess1, TSuccess2, TSuccess3, TSuccess4, TSuccess5, TResult>(this Result<(TSuccess1, TSuccess2, TSuccess3, TSuccess3, TSuccess4)> source, Func<(TSuccess1, TSuccess2, TSuccess3, TSuccess3, TSuccess4), TResult> next)
     {
         return source.Match(
             success => next(success),

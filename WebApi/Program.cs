@@ -64,10 +64,10 @@ app.MapPost("/api/AddTodoItem",
     });
 
 app.MapPost("/api/AddTodoItemV2",
-    async (ICommandDispatcher dispatcher, NewTodoItemDtoV2 todoItem) =>
+    async (ICommandDispatcher dispatcher, ITimeProvider timeProvider, NewTodoItemDtoV2 todoItem) =>
     {
         return await AddTodoItemV2.Command
-            .Create(todoItem.Title, todoItem.Description, todoItem.ExpiryDate)
+            .Create(todoItem.Title, todoItem.Description, todoItem.ExpiryDate, timeProvider)
             .BindAsync(async cmd => await dispatcher.Dispatch(cmd))
             .MatchAsync(
                 success => Results.Ok(success),

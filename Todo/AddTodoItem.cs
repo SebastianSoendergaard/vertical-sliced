@@ -1,4 +1,5 @@
 using Framework;
+using Todo.Domain;
 
 public class AddTodoItem
 {
@@ -32,7 +33,7 @@ public class AddTodoItem
     {
         public async Task<Result<Result>> Handle(Command command, CancellationToken ct)
         {
-            var todoItem = new TodoItem(TodoItemId.NewId(), command.Description);
+            var todoItem = new TodoItem(TodoItemId.NewId(), command.Description.AsTitle(), command.Description, TodoItemExpiryDate.None);
             await store.StoreItem(todoItem.Id, todoItem);
             return new Result(todoItem.Id);
         }
