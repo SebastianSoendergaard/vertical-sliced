@@ -88,6 +88,13 @@ public static class ResultExtension
             errors => Result<TResult>.Failure(errors, next.Errors));
     }
 
+    public static Result<TResult> Join<TSource, TResult>(this Result<TSource> source, Result<TResult> next)
+    {
+        return source.Match(
+            success => next,
+            errors => Result<TResult>.Failure(errors, next.Errors));
+    }
+
     public static Result<TResult> Bind<TSuccess, TResult>(this Result<TSuccess> source, Func<TSuccess, TResult> next)
     {
         return source.Match(

@@ -63,6 +63,17 @@ app.MapPost("/api/AddTodoItem",
                 errors => Results.BadRequest(errors));
     });
 
+app.MapPost("/api/AddTodoItemV2",
+    async (ICommandDispatcher dispatcher, NewTodoItemDtoV2 todoItem) =>
+    {
+        return await AddTodoItemV2.Command
+            .Create(todoItem.Title, todoItem.Description, todoItem.ExpiryDate)
+            .BindAsync(async cmd => await dispatcher.Dispatch(cmd))
+            .MatchAsync(
+                success => Results.Ok(success),
+                errors => Results.BadRequest(errors));
+    });
+
 app.MapPost("/api/CompleteTodoItem/{id}", async (ICommandDispatcher dispatcher, Guid id) => await dispatcher.Dispatch(new CompleteTodoItem.Command(id)));
 app.MapPost("/api/UndoCompleteTodoItem/{id}", async (ICommandDispatcher dispatcher, Guid id) => await dispatcher.Dispatch(new UndoCompleteTodoItem.Command(id)));
 app.MapPost("/api/RemoveCompleteTodoItem/{id}", async (ICommandDispatcher dispatcher, Guid id) => await dispatcher.Dispatch(new RemoveCompleteTodoItem.Command(id)));
@@ -71,6 +82,7 @@ app.MapGet("/api/GetTodoItems", async (IQueryDispatcher dispatcher) => await dis
 app.Run();
 
 record NewTodoItemDto(string Description);
+record NewTodoItemDtoV2(string Title, string Description, DateOnly? ExpiryDate);
 record TodoItemDto(Guid Id, string Description, bool IsComplete);
 
 public partial class Program { }
