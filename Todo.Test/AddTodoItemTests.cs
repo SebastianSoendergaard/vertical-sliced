@@ -25,7 +25,7 @@ namespace Todo.Test
         [Fact]
         public async Task AddTodoItem_ShouldSucced_WhenNoExistingItems()
         {
-            var command = AddTodoItemCommand.Create("Pick up milk");
+            var command = AddTodoItem.Command.Create("Pick up milk");
 
             var result = await _commandDispatcher.Dispatch(command.Value);
 
@@ -35,8 +35,8 @@ namespace Todo.Test
         [Fact]
         public async Task AddTodoItem_ShouldSucced_WhenExistingItems()
         {
-            await _commandDispatcher.Dispatch(AddTodoItemCommand.Create("Pick up milk").Value);
-            var command = AddTodoItemCommand.Create("Pick up sugar");
+            await _commandDispatcher.Dispatch(AddTodoItem.Command.Create("Pick up milk").Value);
+            var command = AddTodoItem.Command.Create("Pick up sugar");
 
             var result = await _commandDispatcher.Dispatch(command.Value);
 
@@ -46,7 +46,7 @@ namespace Todo.Test
         [Fact]
         public void AddTodoItem_ShouldFail_WhenGivenEmptyDescription()
         {
-            var result = AddTodoItemCommand.Create("");
+            var result = AddTodoItem.Command.Create("");
 
             Assert.True(result.IsFailure);
         }
@@ -54,7 +54,7 @@ namespace Todo.Test
         [Fact]
         public void AddTodoItem_ShouldFail_WhenGivenNullDescription()
         {
-            var result = AddTodoItemCommand.Create(null!);
+            var result = AddTodoItem.Command.Create(null!);
 
             Assert.True(result.IsFailure);
         }
@@ -62,9 +62,9 @@ namespace Todo.Test
         [Fact]
         public async Task AddTodoItem_ShouldAddIncompleteItem_WhenSucceded()
         {
-            await _commandDispatcher.Dispatch(AddTodoItemCommand.Create("Pick up milk").Value);
+            await _commandDispatcher.Dispatch(AddTodoItem.Command.Create("Pick up milk").Value);
 
-            var result = await _queryDispatcher.Dispatch(new GetTodoItemsQuery());
+            var result = await _queryDispatcher.Dispatch(new GetTodoItems.Query());
             Assert.NotNull(result);
             Assert.Single(result.TodoItems);
             Assert.False(result.TodoItems.Single().IsComplete);

@@ -1,37 +1,40 @@
 using Framework;
 
-public class AddTodoItemCommand : ICommand<Result<AddTodoItemResult>>
+public class AddTodoItem
 {
-    private AddTodoItemCommand(TodoItemDescription description)
+    public class Command : ICommand<Result<Result>>
     {
-        Description = description;
+        private Command(TodoItemDescription description)
+        {
+            Description = description;
+        }
+
+        internal TodoItemDescription Description { get; private set; }
+
+        public static Result<Command> Create(string description)
+        {
+            return TodoItemDescription.Create(description)
+                .Bind(d => new Command(d));
+        }
     }
 
-    internal TodoItemDescription Description { get; private set; }
-
-    public static Result<AddTodoItemCommand> Create(string description)
-    { 
-        return TodoItemDescription.Create(description)
-            .Bind(d => new AddTodoItemCommand(d));
-    }
-}
-
-public class AddTodoItemResult
-{
-    internal AddTodoItemResult(TodoItemId id)
+    public class Result
     {
-        Id = id.Value;
+        internal Result(TodoItemId id)
+        {
+            Id = id.Value;
+        }
+
+        public Guid Id { get; private set; }
     }
 
-    public Guid Id { get; private set; }
-}
-
-internal class AddTodoItemHandler(IStore store) : ICommandHandler<AddTodoItemCommand, Result<AddTodoItemResult>>
-{
-    public async Task<Result<AddTodoItemResult>> Handle(AddTodoItemCommand command, CancellationToken ct)
+    internal class Handler(IStore store) : ICommandHandler<Command, Result<Result>>
     {
-        var todoItem = new TodoItem(TodoItemId.NewId(), command.Description);
-        await store.StoreItem(todoItem.Id, todoItem);
-        return new AddTodoItemResult(todoItem.Id);
+        public async Task<Result<Result>> Handle(Command command, CancellationToken ct)
+        {
+            var todoItem = new TodoItem(TodoItemId.NewId(), command.Description);
+            await store.StoreItem(todoItem.Id, todoItem);
+            return new Result(todoItem.Id);
+        }
     }
 }

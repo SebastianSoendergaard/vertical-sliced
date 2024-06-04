@@ -1,26 +1,29 @@
 using Framework;
 
-public class GetTodoItemsQuery : IQuery<GetTodoItemsResult>
+public class GetTodoItems
 {
-}
-
-public class GetTodoItemsResult
-{
-    internal GetTodoItemsResult(IReadOnlyList<TodoItem> todoItems)
+    public class Query : IQuery<Result>
     {
-        TodoItems = todoItems.Select(i => new Item(i.Id.Value, i.Description.Value, i.IsComplete)).ToList();
     }
 
-    public IReadOnlyList<Item> TodoItems { get; private set; }
-
-    public record Item(Guid Id, string Description, bool IsComplete);
-}
-
-internal class GetTodoItemsHandler(IStore store) : IQueryHandler<GetTodoItemsQuery, GetTodoItemsResult>
-{
-    public async Task<GetTodoItemsResult> Handle(GetTodoItemsQuery query, CancellationToken ct)
+    public class Result
     {
-        var items = await store.GetItems<TodoItem>();
-        return new GetTodoItemsResult(items.ToList());
+        internal Result(IReadOnlyList<TodoItem> todoItems)
+        {
+            TodoItems = todoItems.Select(i => new Item(i.Id.Value, i.Description.Value, i.IsComplete)).ToList();
+        }
+
+        public IReadOnlyList<Item> TodoItems { get; private set; }
+
+        public record Item(Guid Id, string Description, bool IsComplete);
+    }
+
+    internal class Handler(IStore store) : IQueryHandler<Query, Result>
+    {
+        public async Task<Result> Handle(Query query, CancellationToken ct)
+        {
+            var items = await store.GetItems<TodoItem>();
+            return new Result(items.ToList());
+        }
     }
 }

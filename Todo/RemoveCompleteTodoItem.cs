@@ -1,30 +1,33 @@
 using Framework;
 
-public class RemoveCompleteTodoItemCommand : ICommand
+public class RemoveCompleteTodoItem
 {
-    public RemoveCompleteTodoItemCommand(Guid id)
+    public class Command : ICommand
     {
-        Id = TodoItemId.From(id);
+        public Command(Guid id)
+        {
+            Id = TodoItemId.From(id);
+        }
+
+        internal TodoItemId Id { get; set; }
     }
 
-    internal TodoItemId Id { get; set; }
-}
-
-internal class RemoveCompleteTodoItemHandler(IStore store) : ICommandHandler<RemoveCompleteTodoItemCommand>
-{
-    public async Task Handle(RemoveCompleteTodoItemCommand command, CancellationToken ct)
+    internal class Handler(IStore store) : ICommandHandler<Command>
     {
-        var todoItem = await store.GetItem<TodoItem, TodoItemId>(command.Id);
-        if (todoItem == null)
+        public async Task Handle(Command command, CancellationToken ct)
         {
-            throw new ArgumentException("Given TodoItem does not exist");
-        }
+            var todoItem = await store.GetItem<TodoItem, TodoItemId>(command.Id);
+            if (todoItem == null)
+            {
+                throw new ArgumentException("Given TodoItem does not exist");
+            }
 
-        if (!todoItem.IsComplete)
-        {
-            throw new ArgumentException("The given TodoItem is not complete");
-        }
+            if (!todoItem.IsComplete)
+            {
+                throw new ArgumentException("The given TodoItem is not complete");
+            }
 
-        await store.RemoveItem(todoItem.Id);
+            await store.RemoveItem(todoItem.Id);
+        }
     }
 }

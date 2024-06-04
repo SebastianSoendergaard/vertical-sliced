@@ -1,26 +1,29 @@
 using Framework;
 
-public class UndoCompleteTodoItemCommand : ICommand
+public class UndoCompleteTodoItem
 {
-    public UndoCompleteTodoItemCommand(Guid id)
+    public class Command : ICommand
     {
-        Id = TodoItemId.From(id);
-    }
-
-    internal TodoItemId Id { get; set; }
-}
-
-internal class UndoCompleteTodoItemHandler(IStore store) : ICommandHandler<UndoCompleteTodoItemCommand>
-{
-    public async Task Handle(UndoCompleteTodoItemCommand command, CancellationToken ct)
-    {
-        var todoItem = await store.GetItem<TodoItem, TodoItemId>(command.Id);
-        if (todoItem == null)
+        public Command(Guid id)
         {
-            throw new ArgumentException("Given TodoItem does not exist");
+            Id = TodoItemId.From(id);
         }
 
-        todoItem.MarkAsIncomplete();
-        await store.StoreItem(todoItem.Id, todoItem);
+        internal TodoItemId Id { get; set; }
+    }
+
+    internal class Handler(IStore store) : ICommandHandler<Command>
+    {
+        public async Task Handle(Command command, CancellationToken ct)
+        {
+            var todoItem = await store.GetItem<TodoItem, TodoItemId>(command.Id);
+            if (todoItem == null)
+            {
+                throw new ArgumentException("Given TodoItem does not exist");
+            }
+
+            todoItem.MarkAsIncomplete();
+            await store.StoreItem(todoItem.Id, todoItem);
+        }
     }
 }

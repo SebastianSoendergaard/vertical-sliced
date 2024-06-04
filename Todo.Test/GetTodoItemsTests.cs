@@ -25,7 +25,7 @@ namespace Todo.Test
         [Fact]
         public async Task GetTodoItems_ShouldReturnEmptyCollection_WhenNoItems()
         {
-            var query = new GetTodoItemsQuery();
+            var query = new GetTodoItems.Query();
 
             var result = await _queryDispatcher.Dispatch(query);
 
@@ -35,8 +35,8 @@ namespace Todo.Test
         [Fact]
         public async Task GetTodoItems_ShouldReturnItem_WhenSingleItem()
         {
-            await _commandDispatcher.Dispatch(AddTodoItemCommand.Create("Pick up milk").Value);
-            var query = new GetTodoItemsQuery();
+            await _commandDispatcher.Dispatch(AddTodoItem.Command.Create("Pick up milk").Value);
+            var query = new GetTodoItems.Query();
 
             var result = await _queryDispatcher.Dispatch(query);
 
@@ -46,9 +46,9 @@ namespace Todo.Test
         [Fact]
         public async Task GetTodoItems_ShouldReturnItems_WhenMultipleItems()
         {
-            await _commandDispatcher.Dispatch(AddTodoItemCommand.Create("Pick up milk").Value);
-            await _commandDispatcher.Dispatch(AddTodoItemCommand.Create("Pick up sugar").Value);
-            var query = new GetTodoItemsQuery();
+            await _commandDispatcher.Dispatch(AddTodoItem.Command.Create("Pick up milk").Value);
+            await _commandDispatcher.Dispatch(AddTodoItem.Command.Create("Pick up sugar").Value);
+            var query = new GetTodoItems.Query();
 
             var result = await _queryDispatcher.Dispatch(query);
 

@@ -55,7 +55,7 @@ app.UseSwaggerUI(c =>
 app.MapPost("/api/AddTodoItem", 
     async (ICommandDispatcher dispatcher, NewTodoItemDto todoItem) =>
     {
-        return await AddTodoItemCommand
+        return await AddTodoItem.Command
             .Create(todoItem.Description)
             .BindAsync(async cmd => await dispatcher.Dispatch(cmd))
             .MatchAsync(
@@ -63,10 +63,10 @@ app.MapPost("/api/AddTodoItem",
                 errors => Results.BadRequest(errors));
     });
 
-app.MapPost("/api/CompleteTodoItem/{id}", async (ICommandDispatcher dispatcher, Guid id) => await dispatcher.Dispatch(new CompleteTodoItemCommand(id)));
-app.MapPost("/api/UndoCompleteTodoItem/{id}", async (ICommandDispatcher dispatcher, Guid id) => await dispatcher.Dispatch(new UndoCompleteTodoItemCommand(id)));
-app.MapPost("/api/RemoveCompleteTodoItem/{id}", async (ICommandDispatcher dispatcher, Guid id) => await dispatcher.Dispatch(new RemoveCompleteTodoItemCommand(id)));
-app.MapGet("/api/GetTodoItems", async (IQueryDispatcher dispatcher) => await dispatcher.Dispatch(new GetTodoItemsQuery()));
+app.MapPost("/api/CompleteTodoItem/{id}", async (ICommandDispatcher dispatcher, Guid id) => await dispatcher.Dispatch(new CompleteTodoItem.Command(id)));
+app.MapPost("/api/UndoCompleteTodoItem/{id}", async (ICommandDispatcher dispatcher, Guid id) => await dispatcher.Dispatch(new UndoCompleteTodoItem.Command(id)));
+app.MapPost("/api/RemoveCompleteTodoItem/{id}", async (ICommandDispatcher dispatcher, Guid id) => await dispatcher.Dispatch(new RemoveCompleteTodoItem.Command(id)));
+app.MapGet("/api/GetTodoItems", async (IQueryDispatcher dispatcher) => await dispatcher.Dispatch(new GetTodoItems.Query()));
 
 app.Run();
 

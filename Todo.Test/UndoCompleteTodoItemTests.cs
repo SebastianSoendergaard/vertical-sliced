@@ -25,25 +25,25 @@ namespace Todo.Test
         [Fact]
         public async Task UndoCompleteTodoItem_ShouldMarkItemAsIncompleted_WhenSucceded()
         {
-            var addResult = await _commandDispatcher.Dispatch(AddTodoItemCommand.Create("Pick up milk").Value);
-            await _commandDispatcher.Dispatch(new CompleteTodoItemCommand(addResult.Value.Id));
+            var addResult = await _commandDispatcher.Dispatch(AddTodoItem.Command.Create("Pick up milk").Value);
+            await _commandDispatcher.Dispatch(new CompleteTodoItem.Command(addResult.Value.Id));
 
-            await _commandDispatcher.Dispatch(new UndoCompleteTodoItemCommand(addResult.Value.Id));
+            await _commandDispatcher.Dispatch(new UndoCompleteTodoItem.Command(addResult.Value.Id));
 
-            var result = await _queryDispatcher.Dispatch(new GetTodoItemsQuery());
+            var result = await _queryDispatcher.Dispatch(new GetTodoItems.Query());
             Assert.False(result.TodoItems.Single().IsComplete);
         }
 
         [Fact]
         public async Task UndoCompleteTodoItem_ShouldNotMarkItemAsIncompleted_WhenFailed()
         {
-            var addResult = await _commandDispatcher.Dispatch(AddTodoItemCommand.Create("Pick up milk").Value);
-            await _commandDispatcher.Dispatch(new CompleteTodoItemCommand(addResult.Value.Id));
+            var addResult = await _commandDispatcher.Dispatch(AddTodoItem.Command.Create("Pick up milk").Value);
+            await _commandDispatcher.Dispatch(new CompleteTodoItem.Command(addResult.Value.Id));
 
-            var undoCommand = new UndoCompleteTodoItemCommand(Guid.NewGuid());
+            var undoCommand = new UndoCompleteTodoItem.Command(Guid.NewGuid());
             await Assert.ThrowsAsync<ArgumentException>(async () => await _commandDispatcher.Dispatch(undoCommand));
 
-            var result = await _queryDispatcher.Dispatch(new GetTodoItemsQuery());
+            var result = await _queryDispatcher.Dispatch(new GetTodoItems.Query());
             Assert.True(result.TodoItems.Single().IsComplete);
         }
     }
