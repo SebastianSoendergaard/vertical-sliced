@@ -1,7 +1,6 @@
+using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
-using System.Net;
-using System.Text.Json;
 
 namespace WebApi.Test
 {
@@ -9,16 +8,16 @@ namespace WebApi.Test
     {
         private readonly HttpClient _httpClient;
 
-        public GetTodoItemsTests() 
+        public GetTodoItemsTests()
         {
-            var application = new WebApplicationFactory<Program>();
+            WebApplicationFactory<Program> application = new();
             _httpClient = application.CreateClient();
         }
 
         [Fact]
         public async Task GetTodoItems_ShouldSucced()
         {
-            var response = await _httpClient.GetAsync("api/GetTodoItems");
+            HttpResponseMessage response = await _httpClient.GetAsync("api/GetTodoItems");
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
@@ -26,15 +25,15 @@ namespace WebApi.Test
         [Fact]
         public async Task GetTodoItems_ShouldReturnTodoItems()
         {
-            await _httpClient.PostAsJsonAsync("api/AddTodoItem", new
+            _ = await _httpClient.PostAsJsonAsync("api/AddTodoItem", new
             {
                 Description = "Pick up milk"
             });
 
-            var result = await _httpClient.GetFromJsonAsync<GetTodoItemsResult>("api/GetTodoItems");
+            GetTodoItemsResult? result = await _httpClient.GetFromJsonAsync<GetTodoItemsResult>("api/GetTodoItems");
 
             Assert.NotNull(result);
-            Assert.Single(result.TodoItems);
+            _ = Assert.Single(result.TodoItems);
             Assert.NotEqual(Guid.Empty, result.TodoItems.First().Id);
             Assert.Equal("Pick up milk", result.TodoItems.First().Description);
             Assert.False(result.TodoItems.First().IsComplete);
