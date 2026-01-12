@@ -1,7 +1,9 @@
+using Microsoft.Extensions.DependencyInjection;
+
 namespace Framework;
 
 public interface IQuery<in TResult>
-{ 
+{
 }
 
 public interface IQueryHandler
@@ -20,6 +22,11 @@ public interface IQueryDispatcher
     Task<TResult> Dispatch<TResult>(IQuery<TResult> query, CancellationToken ct = new CancellationToken());
 }
 
+public interface IQueryMiddleware
+{
+    Task<TResult> Handle<TResult>(IQuery<TResult> query, Func<IQuery<TResult>, CancellationToken, Task<TResult>> next, CancellationToken ct);
+}
+
 public class QueryDispatcher(IServiceProvider serviceProvider) : IQueryDispatcher
 {
     public async Task<TResult> Dispatch<TResult>(IQuery<TResult> query, CancellationToken ct)
@@ -32,7 +39,11 @@ public class QueryDispatcher(IServiceProvider serviceProvider) : IQueryDispatche
             throw new InvalidOperationException($"No handler found for query: {query.GetType()}");
         }
 
-        return await (Task<TResult>)handler.Handle(query, ct);
+        var middlewareRegister = serviceProvider.GetService(typeof(QueryMiddlewareRegistry)) as QueryMiddlewareRegistry;
+
+        var pipeline = BuildPipeline(middlewareRegister, query, (q, t) => (Task<TResult>)handler.Handle(q, t), ct);
+
+        return await pipeline.Invoke(query, ct);
     }
 
     private Type GetHandlerType<TResult>(IQuery<TResult> query)
@@ -46,5 +57,37 @@ public class QueryDispatcher(IServiceProvider serviceProvider) : IQueryDispatche
             .First();
 
         return typeof(IQueryHandler<,>).MakeGenericType([queryType, returnType]);
+    }
+
+    private Func<IQuery<TResult>, CancellationToken, Task<TResult>> BuildPipeline<TResult>(QueryMiddlewareRegistry? registry, IQuery<TResult> query, Func<IQuery<TResult>, CancellationToken, Task<TResult>> queryHandler, CancellationToken ct)
+    {
+        var pipeline = queryHandler;
+
+        if (registry != null)
+        {
+            foreach (var middleware in registry.Middlewares.Reverse())
+            {
+                var mwInstance = serviceProvider.GetService(middleware) as IQueryMiddleware;
+                if (mwInstance != null)
+                {
+                    var next = pipeline;
+                    pipeline = (q, t) => mwInstance.Handle(query, next, ct);
+                }
+            }
+        }
+
+        return pipeline;
+    }
+}
+
+public class QueryMiddlewareRegistry(ServiceCollection serviceCollection)
+{
+    private List<Type> _middlewares = new();
+    internal IEnumerable<Type> Middlewares => _middlewares;
+
+    public void Register<TMiddleware>() where TMiddleware : IQueryMiddleware
+    {
+        _middlewares.Add(typeof(TMiddleware));
+        serviceCollection.AddScoped(typeof(TMiddleware));
     }
 }
